@@ -9,24 +9,26 @@ const server = createServer((req, res) => {
   let body = [];
   const statusCodes = [200, 400];
   req
-    .on("data", (chunk) => {
-      body.push(chunk.toString());
-    })
-    .on("end", () => {
-      if (method === "POST" && url === "/echo") {
-        res.statusCode = statusCodes[0];
-        res.end(JSON.stringify(body));
-      } else if (method === "GET") {
-        res.statusCode = statusCodes[0];
-        res.end("Get method successful");
-      } else {
-        res.statusCode = statusCodes[1];
-        res.end();
-      }
-    })
     .on("error", (err) => {
       console.error(err.stack);
+    })
+    .on("data", (chunk) => {
+      body.push(chunk.toString());
     });
+
+  if (method === "POST" && url === "/echo") {
+    req.pipe(res);
+  } else if (method === "GET") {
+    res.statusCode = statusCodes[0];
+    res.end("ends");
+  } else {
+    res.statusCode = statusCodes[1];
+    res.end();
+  }
+
+  res.on("error", (err) => {
+    console.error(err);
+  });
 });
 
 server.listen(port, hostname);
